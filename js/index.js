@@ -16,6 +16,7 @@ let total = document.querySelector("#input-total");
 let labelerror2 = document.querySelector("#labelerror-total");
 let article3 = document.querySelector("#article-tarjeta");
 let calcular = document.querySelector("#calcular");
+let reiniciar = document.querySelector("#reiniciar");
 // let divnombre = document.querySelector("#div-quieneselamigo");
 // let nombre = document.querySelector("#input-quieneselamigo");
 // let labelnombre = document.querySelector("#label-quieneselamigo");
@@ -29,6 +30,7 @@ let p1aside = document.querySelector("#p1-aside");
 let p2aside = document.querySelector("#p2-aside");
 let perroraside = document.querySelector("#perror-aside");
 let perror2aside = document.querySelector("#perror2-aside");
+let perrorarticle = document.querySelector("#perror-article");
 // let labelerror3 = document.querySelector("#labelerror-cuantopago");
 form.onsubmit = (event) => {
     event.preventDefault();
@@ -66,6 +68,25 @@ class Amigo {
 function sumador (n1, n2) {
     let resultado = n1 + n2;
     return resultado;
+}
+function ifSegundosCases (deudorX, deudaN, deudaParaX, nombreX, deudaTotal, uldeudas) {
+    if (deudorX == false) {
+        let deudaNAX = deudaN * deudaParaX / deudaTotal;
+        if (deudaNAX > 0) {            
+            let lidebe = document.createElement("li");
+            lidebe.innerText = `- Debe ${Math.round(deudaNAX)} pesos a ${nombreX}.` 
+            uldeudas.append(lidebe);         
+        }
+    }
+}
+function ifAcreedor2 (nombreY, deudaParaY, uldeudas) {
+    let lideben = document.createElement("li");
+    if (deudaParaY > 0) {
+        lideben.innerText = `- A ${nombreY} le deben ${Math.round(deudaParaY)} pesos y no debe.` 
+    } else if (deudaParaY == 0) {
+        lideben.innerText = `- A ${nombreY} no le deben dinero y no debe.` 
+    }
+    uldeudas.append(lideben);         
 }
 ok.addEventListener("click", ()=>{
     article1.classList.add("display-none");
@@ -151,10 +172,9 @@ ok3.addEventListener("click", ()=>{
             let varPago = document.querySelector(`#inp2${j+1}`);
             let varCargar = document.querySelector(`#inp3${j+1}`);
             varTarjeta.addEventListener("submit", () =>{
-                console.log(varNombre.value);
                 totalReal = sumador(totalReal, parseFloat(varPago.value));
                 if (totalReal <= total.value) {
-                    p2aside.innerText = `Monto actual: ${totalReal}`;       
+                    p2aside.innerText = `Monto actual: ${totalReal}`;
                     if (totalReal == total.value) {
                         p2aside.innerText = `Monto actual: ${totalReal} (límite alcanzado)`;       
                     }
@@ -171,11 +191,10 @@ ok3.addEventListener("click", ()=>{
                     }
                     varNombre.disabled = true;
                     varPago.disabled = true;                    
-                    varCargar.disabled = true;                    
+                    varCargar.disabled = true;
                     let amigoVar = new Amigo (varNombre.value, varPago.value, pagoIdeal, true);
                     deudaTotal = amigoVar.ifAcreedor1 (deudaTotal);
                     Amigos.push (amigoVar);
-                    console.log(Amigos.length);
                     if (Amigos.length == cantAmigos.value){                       
                         calcular.classList.remove("display-none");
                         aside.classList.add("display-none");
@@ -197,12 +216,58 @@ ok3.addEventListener("click", ()=>{
             })
         }
         calcular.addEventListener("click", () =>{
-            if (totalReal == total) {
-                for (let k = 0; k < conjuntoTarjetas.length; k++) {
-                    conjuntoTarjetas[k].innerHTML = "";
+            if (totalReal == parseFloat(total.value)) {
+                for (let m = 0; m <= Amigos.length-1; m++) {
+                    conjuntoTarjetas[m].innerHTML = "";
+                    let objetoM = Amigos[m];
+                    let uldeudas = document.createElement("ul");
+                    let amigocartel = document.createElement("h2");
+                    amigocartel.innerText = `Amigo N°${m+1}: ${objetoM.nombre}`
+                    conjuntoTarjetas[m].append(amigocartel);
+                    conjuntoTarjetas[m].append(uldeudas);       
+                    if (objetoM.deudor == false) {
+                        ifAcreedor2 (objetoM.nombre, objetoM.deudaPara, uldeudas);
+                    } else {       
+                        for (let n = 0; n <= Amigos.length-1; n++) {
+                            while (n != m && n <= Amigos.length-1) {
+                                let objetoN = Amigos[n];
+                                 ifSegundosCases (objetoN.deudor, objetoM.deuda, objetoN.deudaPara, objetoN.nombre, deudaTotal, uldeudas);
+                                 // (He cargado dos variables distintas que contienen los objetos originarios del array "Amigos", para separar en parámetros
+                                 // a las propiedades pertenecientes al deudor (con objetoM) de las pertenecientes a los acreedores (con objetoN). Esto gracias, además, a las condiciones del while contenedor.)
+                            }
+                        }
+                    }
                 }
-            } else if (totalReal ){} // PENDIENTE DE TERMINAR
-
+                calcular.classList.add("display-none");
+                reiniciar.classList.remove("display-none");
+                reiniciar.addEventListener("click", () =>{
+                    for (let o = 0; o < Amigos.length; o++){
+                    }
+                })
+            } else {
+                perrorarticle.innerText = `El total original estipulado (${total.value}) difiere del monto sumado entre sus compañeros (${totalReal}). ${intentar}`;
+                perrorarticle.classList.remove("display-none");
+                article3.append(perrorarticle);
+                let okdifiere = document.createElement("button");
+                okdifiere.innerText = `OK`;
+                article3.append(okdifiere);
+                okdifiere.addEventListener("click", () => {
+                    perrorarticle.classList.add("display-none");
+                    okdifiere.classList.add("display-none");
+                    totalReal = 0;
+                    p2aside.innerText = `Monto actual: ${totalReal}`;
+                    Amigos.splice(0, Amigos.length);
+                    calcular.classList.add("display-none");
+                    aside.classList.remove("display-none");
+                    for (let l = 0; l < conjuntoTarjetas.length; l++) {
+                        varPago = document.querySelector(`#inp2${l+1}`);
+                        varPago.value = "";
+                        varPago.disabled = false;
+                        varCargar = document.querySelector(`#inp3${l+1}`);
+                        varCargar.disabled = false;
+                    }
+                })                
+            }
         })
     }
 })
