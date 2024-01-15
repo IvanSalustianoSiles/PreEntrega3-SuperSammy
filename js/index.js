@@ -335,6 +335,7 @@ mostrarHistorial.addEventListener("click", ()=>{
     historialSection.classList.remove("display-none");
     for (let p = 0; p < sesion.length; p++) {
         let varSesion = sesion[p];
+        console.log(varSesion);
         varSesion.mostrarDatos();
     }
     // regresar.innerText = `Volver al sistema`;
