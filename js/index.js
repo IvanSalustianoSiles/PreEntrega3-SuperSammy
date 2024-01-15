@@ -1,7 +1,4 @@
-// let main = document.querySelector("main");
 let intentar = `Por favor, inténtelo de nuevo.`;
-// let i;
-// main.classList.add("red-background");
 let ok = document.querySelector("#ok-button");
 let ok2 = document.querySelector("#ok2");
 let ok3 = document.querySelector("#ok3");
@@ -16,21 +13,22 @@ let total = document.querySelector("#input-total");
 let labelerror2 = document.querySelector("#labelerror-total");
 let article3 = document.querySelector("#article-tarjeta");
 let calcular = document.querySelector("#calcular");
-// let divnombre = document.querySelector("#div-quieneselamigo");
-// let nombre = document.querySelector("#input-quieneselamigo");
-// let labelnombre = document.querySelector("#label-quieneselamigo");
+let reiniciar = document.querySelector("#reiniciar");
+let historialSection = document.querySelector("#historial-section");
+let mostrarHistorial = document.querySelector("#mostrar-historial");
 let labelcuantosamigos = document.querySelector("#label-cuantosamigos");
 let labeltotal = document.querySelector("#label-total");
-// let divcuantopago = document.querySelector("#div-cuantopago");
-// let pagoReal = document.querySelector("#input-cuantopago");
-// let labelpagoReal = document.querySelector("#label-cuantopago");
 let aside = document.querySelector("aside");
 let p1aside = document.querySelector("#p1-aside");
 let p2aside = document.querySelector("#p2-aside");
 let perroraside = document.querySelector("#perror-aside");
 let perror2aside = document.querySelector("#perror2-aside");
 let perrorarticle = document.querySelector("#perror-article");
-// let labelerror3 = document.querySelector("#labelerror-cuantopago");
+let guardar = document.createElement("button");
+let regresar = document.createElement("button");
+let sesionJS = JSON.parse(localStorage.getItem("sesion"));
+let booleanhelper = false;
+guardar.classList.add("display-none");
 form.onsubmit = (event) => {
     event.preventDefault();
 }
@@ -64,6 +62,48 @@ class Amigo {
          return resultado;
     }
 }
+let sesion = [];
+class historial {
+    cantAmigos;
+    total;
+    amigos;
+    amigosLength;
+    deudaTotal;
+    constructor (cantAmigos, total, amigos, amigosLength, deudaTotal) {
+        this.cantAmigos = cantAmigos;
+        this.total = total;
+        this.amigos = amigos;
+        this.amigosLength = amigosLength;
+        this.deudaTotal = deudaTotal;
+    }
+    mostrarDatos () {
+        let article4 = document.createElement("article");
+        historialSection.append(article4);
+        for (let m = 0; m < this.amigosLength; m++) {
+            let tarjetaHistorial = document.createElement("div");
+            historialSection.append(tarjetaHistorial);
+            let objetoM = this.amigos[m];
+            let uldeudas = document.createElement("ul");
+            let amigocartel = document.createElement("h2");
+            amigocartel.innerText = `Amigo N°${m+1}: ${objetoM.nombre}`;
+            tarjetaHistorial.append(amigocartel);
+            tarjetaHistorial.append(uldeudas);       
+            if (objetoM.deudor == false) {
+                ifAcreedor2 (objetoM.deudaPara, uldeudas);
+            } else {
+                for (let n = 0; n < this.amigos.length; n++) {
+                    while (n != m && n < this.amigos.length) {
+                        let objetoN = this.amigos[n];
+                         ifSegundosCases (objetoN.deudor, objetoM.deuda, objetoN.deudaPara, objetoN.nombre, this.deudaTotal, uldeudas);
+                         // (He cargado dos variables distintas que contienen los objetos originarios del array "Amigos", para separar en parámetros
+                         // a las propiedades pertenecientes al deudor (con objetoM) de las pertenecientes a los acreedores (con objetoN). Esto gracias, además, a las condiciones del while contenedor.)
+                        n++;
+                    }
+                }
+            }
+        }
+    }
+}
 function sumador (n1, n2) {
     let resultado = n1 + n2;
     return resultado;
@@ -78,14 +118,19 @@ function ifSegundosCases (deudorX, deudaN, deudaParaX, nombreX, deudaTotal, ulde
         }
     }
 }
-function ifAcreedor2 (nombreY, deudaParaY, uldeudas) {
+function ifAcreedor2 (deudaParaY, uldeudas) {
     let lideben = document.createElement("li");
     if (deudaParaY > 0) {
-        lideben.innerText = `- A ${nombreY} le deben ${Math.round(deudaParaY)} pesos y no debe.` 
+        lideben.innerText = `- Le deben ${Math.round(deudaParaY)} pesos y no debe.` 
     } else if (deudaParaY == 0) {
-        lideben.innerText = `- A ${nombreY} no le deben dinero y no debe.` 
+        lideben.innerText = `- No le deben dinero y no debe.` 
     }
     uldeudas.append(lideben);         
+}
+if (sesionJS !== null) {
+    for (let p = 0; p < sesionJS.length; p++) {
+        sesion.push(sesionJS[p]);
+    }
 }
 ok.addEventListener("click", ()=>{
     article1.classList.add("display-none");
@@ -216,6 +261,7 @@ ok3.addEventListener("click", ()=>{
         }
         calcular.addEventListener("click", () =>{
             if (totalReal == parseFloat(total.value)) {
+                booleanhelper = true;
                 for (let m = 0; m <= Amigos.length-1; m++) {
                     conjuntoTarjetas[m].innerHTML = "";
                     let objetoM = Amigos[m];
@@ -225,7 +271,7 @@ ok3.addEventListener("click", ()=>{
                     conjuntoTarjetas[m].append(amigocartel);
                     conjuntoTarjetas[m].append(uldeudas);       
                     if (objetoM.deudor == false) {
-                        ifAcreedor2 (objetoM.nombre, objetoM.deudaPara, uldeudas);
+                        ifAcreedor2 (objetoM.deudaPara, uldeudas);
                     } else {       
                         for (let n = 0; n < Amigos.length; n++) {
                             while (n != m && n < Amigos.length) {
@@ -236,9 +282,25 @@ ok3.addEventListener("click", ()=>{
                                 n++;
                             }
                         }
+                        guardar.addEventListener("click", ()=>{
+                            let nuevoHistorial = new historial(cantAmigos.value, total.value, Amigos, Amigos.length, deudaTotal);
+                            console.log(deudaTotal);
+                            console.log(nuevoHistorial);
+                            sesion.unshift(nuevoHistorial);
+                            localStorage.removeItem("sesion");
+                            localStorage.setItem("sesion", JSON.stringify(sesion));
+                            historialSection.innerHTML = "";                    
+                        })
                     }
                 }
+                article3.append(reiniciar);
+                article3.append(mostrarHistorial);
                 calcular.classList.add("display-none");
+                reiniciar.classList.remove("display-none");
+                reiniciar.addEventListener("click", () =>{
+                    for (let o = 0; o < Amigos.length; o++){
+                    }
+                })
             } else {
                 perrorarticle.innerText = `El total original estipulado (${total.value}) difiere del monto sumado entre sus compañeros (${totalReal}). ${intentar}`;
                 perrorarticle.classList.remove("display-none");
@@ -263,6 +325,31 @@ ok3.addEventListener("click", ()=>{
                     }
                 })                
             }
-        })
+            guardar.innerText = `GUARDAR EN HISTORIAL`;
+            guardar.classList.remove("display-none");
+            article3.append(guardar);
+        })                     
     }
 })
+mostrarHistorial.addEventListener("click", ()=>{
+    historialSection.classList.remove("display-none");
+    for (let p = 0; p < sesion.length; p++) {
+        let varSesion = sesion[p];
+        varSesion.mostrarDatos();
+    }
+    // regresar.innerText = `Volver al sistema`;
+    // historialSection.append(regresar);
+    if (booleanhelper == true) {
+        article3.classList.add("display-none");
+    } else {
+        article1.classList.add("display-none");
+    }
+})
+// regresar.addEventListener("click", ()=>{
+//     historialSection.classList.add("display-none");
+//     if (booleanhelper == true) {
+//         article3.classList.remove("display-none");
+//     } else {
+//         article1.classList.remove("display-none");
+//     }
+// }) Aún no está disponible este evento
