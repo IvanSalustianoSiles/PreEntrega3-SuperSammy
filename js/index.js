@@ -76,33 +76,6 @@ class historial {
         this.amigosLength = amigosLength;
         this.deudaTotal = deudaTotal;
     }
-    mostrarDatos () {
-        let article4 = document.createElement("article");
-        historialSection.append(article4);
-        for (let m = 0; m < this.amigosLength; m++) {
-            let tarjetaHistorial = document.createElement("div");
-            historialSection.append(tarjetaHistorial);
-            let objetoM = this.amigos[m];
-            let uldeudas = document.createElement("ul");
-            let amigocartel = document.createElement("h2");
-            amigocartel.innerText = `Amigo N°${m+1}: ${objetoM.nombre}`;
-            tarjetaHistorial.append(amigocartel);
-            tarjetaHistorial.append(uldeudas);       
-            if (objetoM.deudor == false) {
-                ifAcreedor2 (objetoM.deudaPara, uldeudas);
-            } else {
-                for (let n = 0; n < this.amigos.length; n++) {
-                    while (n != m && n < this.amigos.length) {
-                        let objetoN = this.amigos[n];
-                         ifSegundosCases (objetoN.deudor, objetoM.deuda, objetoN.deudaPara, objetoN.nombre, this.deudaTotal, uldeudas);
-                         // (He cargado dos variables distintas que contienen los objetos originarios del array "Amigos", para separar en parámetros
-                         // a las propiedades pertenecientes al deudor (con objetoM) de las pertenecientes a los acreedores (con objetoN). Esto gracias, además, a las condiciones del while contenedor.)
-                        n++;
-                    }
-                }
-            }
-        }
-    }
 }
 function sumador (n1, n2) {
     let resultado = n1 + n2;
@@ -127,10 +100,53 @@ function ifAcreedor2 (deudaParaY, uldeudas) {
     }
     uldeudas.append(lideben);         
 }
+function mostrarDatos (amigosLength, amigos, deudaTotal, ) {
+    let article4 = document.createElement("article");
+    historialSection.append(article4);
+    for (let m = 0; m < amigosLength; m++) {
+        let tarjetaHistorial = document.createElement("div");
+        historialSection.append(tarjetaHistorial);
+        let objetoM = amigos[m];
+        let uldeudas = document.createElement("ul");
+        let amigocartel = document.createElement("h2");
+        amigocartel.innerText = `Amigo N°${m+1}: ${objetoM.nombre}`;
+        tarjetaHistorial.append(amigocartel);
+        tarjetaHistorial.append(uldeudas);       
+        if (objetoM.deudor == false) {
+            ifAcreedor2 (objetoM.deudaPara, uldeudas);
+        } else {
+            for (let n = 0; n < amigos.length; n++) {
+                while (n != m && n < amigos.length) {
+                    let objetoN = amigos[n];
+                     ifSegundosCases (objetoN.deudor, objetoM.deuda, objetoN.deudaPara, objetoN.nombre, deudaTotal, uldeudas);
+                     // (He cargado dos variables distintas que contienen los objetos originarios del array "Amigos", para separar en parámetros
+                     // a las propiedades pertenecientes al deudor (con objetoM) de las pertenecientes a los acreedores (con objetoN). Esto gracias, además, a las condiciones del while contenedor.)
+                    n++;
+                }
+            }
+        }
+    }
+}
 if (sesionJS !== null) {
     for (let p = 0; p < sesionJS.length; p++) {
         sesion.push(sesionJS[p]);
     }
+    mostrarHistorial.addEventListener("click", ()=>{
+        historialSection.innerHTML = "";
+        historialSection.classList.remove("display-none");
+        for (let p = 0; p < sesion.length; p++) {
+            let varSesion = sesion[p];
+            console.log(varSesion);
+            mostrarDatos(varSesion.amigosLength, varSesion.amigos, varSesion.deudaTotal);
+        }
+        regresar.innerText = `Volver al sistema`;
+        historialSection.append(regresar);
+        if (booleanhelper == true) {
+            article3.classList.add("display-none");
+        } else {
+            article1.classList.add("display-none");
+        }
+    })
 }
 ok.addEventListener("click", ()=>{
     article1.classList.add("display-none");
@@ -282,15 +298,6 @@ ok3.addEventListener("click", ()=>{
                                 n++;
                             }
                         }
-                        guardar.addEventListener("click", ()=>{
-                            let nuevoHistorial = new historial(cantAmigos.value, total.value, Amigos, Amigos.length, deudaTotal);
-                            console.log(deudaTotal);
-                            console.log(nuevoHistorial);
-                            sesion.unshift(nuevoHistorial);
-                            localStorage.removeItem("sesion");
-                            localStorage.setItem("sesion", JSON.stringify(sesion));
-                            historialSection.innerHTML = "";                    
-                        })
                     }
                 }
                 article3.append(reiniciar);
@@ -300,6 +307,15 @@ ok3.addEventListener("click", ()=>{
                 reiniciar.addEventListener("click", () =>{
                     for (let o = 0; o < Amigos.length; o++){
                     }
+                })
+                guardar.addEventListener("click", ()=>{
+                    let nuevoHistorial = new historial(cantAmigos.value, total.value, Amigos, Amigos.length, deudaTotal);
+                    console.log(deudaTotal);
+                    console.log(nuevoHistorial);
+                    sesion.unshift(nuevoHistorial);
+                    localStorage.removeItem("sesion");
+                    localStorage.setItem("sesion", JSON.stringify(sesion));
+                    historialSection.innerHTML = "";                    
                 })
             } else {
                 perrorarticle.innerText = `El total original estipulado (${total.value}) difiere del monto sumado entre sus compañeros (${totalReal}). ${intentar}`;
@@ -331,26 +347,11 @@ ok3.addEventListener("click", ()=>{
         })                     
     }
 })
-mostrarHistorial.addEventListener("click", ()=>{
-    historialSection.classList.remove("display-none");
-    for (let p = 0; p < sesion.length; p++) {
-        let varSesion = sesion[p];
-        console.log(varSesion);
-        varSesion.mostrarDatos();
-    }
-    // regresar.innerText = `Volver al sistema`;
-    // historialSection.append(regresar);
-    if (booleanhelper == true) {
-        article3.classList.add("display-none");
-    } else {
-        article1.classList.add("display-none");
-    }
+regresar.addEventListener("click", ()=>{
+historialSection.classList.add("display-none");
+if (booleanhelper == true) {
+    article3.classList.remove("display-none");
+} else {
+    article1.classList.remove("display-none");
+}
 })
-// regresar.addEventListener("click", ()=>{
-//     historialSection.classList.add("display-none");
-//     if (booleanhelper == true) {
-//         article3.classList.remove("display-none");
-//     } else {
-//         article1.classList.remove("display-none");
-//     }
-// }) Aún no está disponible este evento
