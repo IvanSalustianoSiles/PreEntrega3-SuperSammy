@@ -16,7 +16,6 @@ let total = document.querySelector("#input-total");
 let labelerror2 = document.querySelector("#labelerror-total");
 let article3 = document.querySelector("#article-tarjeta");
 let calcular = document.querySelector("#calcular");
-let reiniciar = document.querySelector("#reiniciar");
 // let divnombre = document.querySelector("#div-quieneselamigo");
 // let nombre = document.querySelector("#input-quieneselamigo");
 // let labelnombre = document.querySelector("#label-quieneselamigo");
@@ -228,22 +227,18 @@ ok3.addEventListener("click", ()=>{
                     if (objetoM.deudor == false) {
                         ifAcreedor2 (objetoM.nombre, objetoM.deudaPara, uldeudas);
                     } else {       
-                        for (let n = 0; n <= Amigos.length-1; n++) {
-                            while (n != m && n <= Amigos.length-1) {
+                        for (let n = 0; n < Amigos.length; n++) {
+                            while (n != m && n < Amigos.length) {
                                 let objetoN = Amigos[n];
                                  ifSegundosCases (objetoN.deudor, objetoM.deuda, objetoN.deudaPara, objetoN.nombre, deudaTotal, uldeudas);
                                  // (He cargado dos variables distintas que contienen los objetos originarios del array "Amigos", para separar en parámetros
                                  // a las propiedades pertenecientes al deudor (con objetoM) de las pertenecientes a los acreedores (con objetoN). Esto gracias, además, a las condiciones del while contenedor.)
+                                n++;
                             }
                         }
                     }
                 }
                 calcular.classList.add("display-none");
-                reiniciar.classList.remove("display-none");
-                reiniciar.addEventListener("click", () =>{
-                    for (let o = 0; o < Amigos.length; o++){
-                    }
-                })
             } else {
                 perrorarticle.innerText = `El total original estipulado (${total.value}) difiere del monto sumado entre sus compañeros (${totalReal}). ${intentar}`;
                 perrorarticle.classList.remove("display-none");
